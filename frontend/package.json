@@ -4,10 +4,13 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.4.3",
+    "@material-ui/icons": "^4.4.3",
     "eslint-plugin-import": "^2.18.2",
+    "formik": "^1.5.8",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-route": "^1.0.3",
+    "react-router": "^5.1.0",
     "react-router-dom": "^5.1.0",
     "react-scripts": "3.1.2"
   },
