@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import PropTypes from "prop-types";
@@ -12,20 +12,21 @@ import { fade, makeStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 
 import LoginButton from "./LoginButton";
+import LogoutButton from "./LogoutButton";
 
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1
   },
-  menuButton: {
-    marginRight: theme.spacing(2)
-  },
   title: {
-    flexGrow: 1,
     display: "none",
     [theme.breakpoints.up("sm")]: {
       display: "block"
     }
+  },
+  toolLeft: {
+    display: "flex",
+    flexGrow: 1
   },
   search: {
     position: "relative",
@@ -34,11 +35,9 @@ const useStyles = makeStyles(theme => ({
     "&:hover": {
       backgroundColor: fade(theme.palette.common.white, 0.25)
     },
-    marginLeft: 0,
-    marginRight: theme.spacing(2),
     width: "100%",
     [theme.breakpoints.up("sm")]: {
-      marginLeft: theme.spacing(1),
+      marginLeft: theme.spacing(5),
       width: "auto"
     }
   },
@@ -64,33 +63,58 @@ const useStyles = makeStyles(theme => ({
         width: 200
       }
     }
+  },
+  userInfo: {
+    marginRight: theme.spacing(2)
   }
 }));
 
-const NavBar = ({ actions }) => {
+const NavBar = ({ actions, history, auth }) => {
   const classes = useStyles();
 
-  return (
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (localStorage.getItem("jwtToken")) {
+        await actions.auth.getCurrentUser();
+      }
+    };
+    fetchCurrentUser();
+  }, [actions]);
+
+  return localStorage.getItem("jwtToken") && !auth.isAuthenticated ? (
+    <div>isLoading</div>
+  ) : (
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
-          <Typography className={classes.title} variant="h6" noWrap>
-            Project-Test
-          </Typography>
-          <div className={classes.search}>
-            <div className={classes.searchIcon}>
-              <SearchIcon />
+          <div className={classes.toolLeft}>
+            <Typography className={classes.title} variant="h6" noWrap>
+              Project-Test
+            </Typography>
+            <div className={classes.search}>
+              <div className={classes.searchIcon}>
+                <SearchIcon />
+              </div>
+              <InputBase
+                placeholder="Search…"
+                classes={{
+                  root: classes.inputRoot,
+                  input: classes.inputInput
+                }}
+                inputProps={{ "aria-label": "search" }}
+              />
             </div>
-            <InputBase
-              placeholder="Search…"
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput
-              }}
-              inputProps={{ "aria-label": "search" }}
-            />
           </div>
-          <LoginButton onLogin={actions.auth.login} />
+          {auth.isAuthenticated ? (
+            <React.Fragment>
+              <Typography variant="body2" className={classes.userInfo} noWrap>
+                Hi, {auth.user.name} !
+              </Typography>
+              <LogoutButton onLogout={actions.auth.logout} history={history} />
+            </React.Fragment>
+          ) : (
+            <LoginButton onLogin={actions.auth.login} history={history} />
+          )}
         </Toolbar>
       </AppBar>
     </div>
@@ -98,7 +122,9 @@ const NavBar = ({ actions }) => {
 };
 
 NavBar.propTypes = {
-  actions: PropTypes.objectOf(PropTypes.object).isRequired
+  actions: PropTypes.objectOf(PropTypes.object).isRequired,
+  history: PropTypes.object.isRequired,
+  auth: PropTypes.object.isRequired
 };
 
 const mapStateToProps = state => {

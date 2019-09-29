@@ -21,7 +21,10 @@ Route::group([
     Route::post('register', 'Auth\AuthController@register');
 });
 
-Route::group(['middleware' => ['api', 'jwt.auth']], function () {
+Route::group([
+    ['middleware' => ['api', 'jwt.auth']],
+    'prefix' => 'auth'
+], function () {
     Route::get('me', 'Auth\AuthController@me');
 });
 
