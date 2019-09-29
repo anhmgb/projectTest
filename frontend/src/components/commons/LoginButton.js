@@ -2,10 +2,7 @@ import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core";
 import { withFormik, Form } from "formik";
 import * as Yup from "yup";
-import axios from "axios";
 import PropTypes from "prop-types";
-
-import { baseURL } from "../../constants/config";
 
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -213,7 +210,8 @@ LoginButton.propTypes = {
   errors: PropTypes.object.isRequired,
   touched: PropTypes.object.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
-  onLogin: PropTypes.func.isRequired
+  onLogin: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired
 };
 
 export default withFormik({
@@ -234,18 +232,6 @@ export default withFormik({
   }),
   handleSubmit(userData, { setSubmitting, setErrors, props }) {
     setSubmitting(true);
-    // axios
-    //   .post(`${baseURL}/auth/login`, userData)
-    //   .then(res => {
-    //     console.log(res);
-    //     setSubmitting(false);
-    //   })
-    //   .catch(err => {
-    //     setSubmitting(false);
-    //     setErrors({
-    //       password: "Wrong email or password"
-    //     });
-    //   });
-    props.onLogin(userData, setSubmitting, setErrors);
+    props.onLogin(userData, setSubmitting, setErrors, props.history);
   }
 })(LoginButton);

@@ -54,6 +54,7 @@ class AuthController extends Controller
 
         if ($token = Auth::guard()->attempt($credentials)) {
             return response()->json([
+                'user' => $user,
                 'access_token' => $token,
                 'token_type' => 'bearer',
                 'expires_in' => Auth::guard()->factory()->getTTL() * 60
