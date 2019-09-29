@@ -3,8 +3,9 @@ import { makeStyles } from "@material-ui/core";
 import { withFormik, Form } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
+import PropTypes from "prop-types";
 
-import { baseUrl } from "../../constants/config";
+import { baseURL } from "../../constants/config";
 
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -17,6 +18,7 @@ import Grid from "@material-ui/core/Grid";
 import VerifiedUser from "@material-ui/icons/VerifiedUser";
 import Avatar from "@material-ui/core/Avatar";
 import Typography from "@material-ui/core/Typography";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const useStyles = makeStyles(theme => ({
   textField: {
@@ -26,13 +28,6 @@ const useStyles = makeStyles(theme => ({
     marginRight: theme.spacing(1),
     width: theme.spacing(42)
   },
-  slogan: {
-    marginBottom: 0,
-    paddingBottom: 0
-  },
-  sloganContent: {
-    paddingBottom: 0
-  },
   leftIcon: {
     marginRight: theme.spacing(1)
   },
@@ -41,7 +36,22 @@ const useStyles = makeStyles(theme => ({
     width: theme.spacing(42)
   },
   dialog: {
+    position: "relative",
+    zIndex: 1
+  },
+  dialogTitle: {
+    textAlign: "center"
+  },
+  dialogContent: {
     overflow: "hidden"
+  },
+  slogan: {
+    marginBottom: 0,
+    paddingBottom: 0
+  },
+  sloganContent: {
+    paddingBottom: 0,
+    textAlign: "center"
   },
   avatar: {
     width: theme.spacing(23),
@@ -50,6 +60,13 @@ const useStyles = makeStyles(theme => ({
   errorMessage: {
     marginLeft: theme.spacing(1),
     color: theme.palette.error.main
+  },
+  progress: {
+    position: "absolute",
+    opacity: 2,
+    zIndex: 2,
+    top: "45%",
+    left: "48%"
   }
 }));
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -61,7 +78,8 @@ const LoginButton = ({
   handleChange,
   handleSubmit,
   errors,
-  touched
+  touched,
+  isSubmitting
 }) => {
   const [openLoginForm, setOpenLoginForm] = useState(false);
   const classes = useStyles();
@@ -83,83 +101,93 @@ const LoginButton = ({
         onClose={handleCloseLoginForm}
         aria-labelledby="alert-dialog-slide-title"
         aria-describedby="alert-dialog-slide-description"
+        className={classes.dialog}
       >
-        <DialogTitle id="alert-dialog-slide-title">
-          Wellcome back, my friend !!!
-        </DialogTitle>
-        <DialogContent className={classes.slogan}>
-          <DialogContentText
-            id="alert-dialog-slide-description"
-            className={classes.sloganContent}
+        {isSubmitting && <CircularProgress className={classes.progress} />}
+        <div style={{ opacity: isSubmitting ? 0.4 : 1 }}>
+          <DialogTitle
+            id="alert-dialog-slide-title"
+            className={classes.dialogTitle}
           >
-            "Chúng ta của sau này cái gì cũng có, chỉ là không có ... chúng ta"
-          </DialogContentText>
-        </DialogContent>
-        <DialogContent className={classes.dialog}>
-          <Grid container spacing={3}>
-            <Grid item xs={4}>
-              <Avatar
-                alt="Avatar img"
-                src="/groot.png"
-                className={classes.avatar}
-              />
-            </Grid>
-            <Grid item xs={8}>
-              <Form onSubmit={handleSubmit}>
-                <TextField
-                  id="standard-dense"
-                  label="Email"
-                  name="email"
-                  className={classes.textField}
-                  value={values.email}
-                  onChange={handleChange}
+            Wellcome back, my friend !!!
+          </DialogTitle>
+          <DialogContent className={classes.slogan}>
+            <DialogContentText
+              id="alert-dialog-slide-description"
+              className={classes.sloganContent}
+            >
+              "Chúng ta của sau này cái gì cũng có, chỉ là không có ... chúng
+              ta"
+            </DialogContentText>
+          </DialogContent>
+          <DialogContent className={classes.dialogContent}>
+            <Grid container spacing={3}>
+              <Grid item xs={4}>
+                <Avatar
+                  alt="Avatar img"
+                  src="/groot.png"
+                  className={classes.avatar}
                 />
-                {touched.email && errors.email && (
-                  <Typography
-                    variant="subtitle2"
-                    className={classes.errorMessage}
+              </Grid>
+              <Grid item xs={8}>
+                <Form onSubmit={handleSubmit}>
+                  <TextField
+                    id="standard-dense"
+                    label="Email"
+                    name="email"
+                    className={classes.textField}
+                    value={values.email}
+                    onChange={handleChange}
+                  />
+                  {touched.email && errors.email && (
+                    <Typography
+                      variant="subtitle2"
+                      className={classes.errorMessage}
+                    >
+                      {errors.email}
+                    </Typography>
+                  )}
+                  <TextField
+                    id="standard-password-input"
+                    label="Password"
+                    name="password"
+                    className={classes.textField}
+                    type="password"
+                    autoComplete="current-password"
+                    value={values.password}
+                    onChange={handleChange}
+                  />
+                  {touched.password && errors.password && (
+                    <Typography
+                      variant="subtitle2"
+                      className={classes.errorMessage}
+                    >
+                      {errors.password}
+                    </Typography>
+                  )}
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    className={classes.button}
+                    disabled={isSubmitting}
                   >
-                    {errors.email}
-                  </Typography>
-                )}
-                <TextField
-                  id="standard-password-input"
-                  label="Password"
-                  name="password"
-                  className={classes.textField}
-                  type="password"
-                  autoComplete="current-password"
-                  value={values.password}
-                  onChange={handleChange}
-                />
-                {touched.password && errors.password && (
-                  <Typography
-                    variant="subtitle2"
-                    className={classes.errorMessage}
+                    <VerifiedUser className={classes.leftIcon} />
+                    Login with google
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    className={classes.button}
+                    type="submit"
+                    disabled={isSubmitting}
                   >
-                    {errors.password}
-                  </Typography>
-                )}
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  className={classes.button}
-                >
-                  <VerifiedUser className={classes.leftIcon} />
-                  Login with google
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  className={classes.button}
-                  type="submit"
-                >
-                  Login
-                </Button>
-              </Form>
+                    Login
+                  </Button>
+                </Form>
+              </Grid>
             </Grid>
-          </Grid>
-        </DialogContent>
+          </DialogContent>
+        </div>
       </Dialog>
     );
   };
@@ -178,24 +206,23 @@ const LoginButton = ({
   );
 };
 
-const mapPropsToValues = () => {
-  return {
-    email: "anhmgb@hblab.vn",
-    password: ""
-  };
-};
-
-const handleSubmit = userData => {
-  axios
-    .post(`http://${baseUrl}/api/auth/login`, userData)
-    .then(res => {
-      console.log(res);
-    })
-    .catch(err => console.log(err));
+LoginButton.propTypes = {
+  values: PropTypes.object.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  errors: PropTypes.object.isRequired,
+  touched: PropTypes.object.isRequired,
+  isSubmitting: PropTypes.bool.isRequired,
+  onLogin: PropTypes.func.isRequired
 };
 
 export default withFormik({
-  mapPropsToValues,
+  mapPropsToValues() {
+    return {
+      email: "anhmgb@hblab.vn",
+      password: ""
+    };
+  },
   validationSchema: Yup.object().shape({
     email: Yup.string()
       .email()
@@ -205,5 +232,20 @@ export default withFormik({
       .max(20)
       .required()
   }),
-  handleSubmit
+  handleSubmit(userData, { setSubmitting, setErrors, props }) {
+    setSubmitting(true);
+    // axios
+    //   .post(`${baseURL}/auth/login`, userData)
+    //   .then(res => {
+    //     console.log(res);
+    //     setSubmitting(false);
+    //   })
+    //   .catch(err => {
+    //     setSubmitting(false);
+    //     setErrors({
+    //       password: "Wrong email or password"
+    //     });
+    //   });
+    props.onLogin(userData, setSubmitting, setErrors);
+  }
 })(LoginButton);

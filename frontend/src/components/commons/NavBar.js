@@ -1,4 +1,9 @@
 import React from "react";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import PropTypes from "prop-types";
+import * as authActions from "../../actions/authActions";
+
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
@@ -62,7 +67,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const NavBar = () => {
+const NavBar = ({ actions }) => {
   const classes = useStyles();
 
   return (
@@ -85,11 +90,32 @@ const NavBar = () => {
               inputProps={{ "aria-label": "search" }}
             />
           </div>
-          <LoginButton />
+          <LoginButton onLogin={actions.auth.login} />
         </Toolbar>
       </AppBar>
     </div>
   );
 };
 
-export default NavBar;
+NavBar.propTypes = {
+  actions: PropTypes.objectOf(PropTypes.object).isRequired
+};
+
+const mapStateToProps = state => {
+  return {
+    auth: state.auth
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    actions: {
+      auth: bindActionCreators(authActions, dispatch)
+    }
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(NavBar);
